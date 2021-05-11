@@ -1,10 +1,8 @@
 #include "Keyboard.h"
 
 KEYBOARD keyboard;
-/// <summary>
-/// 
-/// </summary>
-/// <param name=""></param>
+
+
 VOID AllKeyUpdate(VOID)
 {
 	for (int i = 0; i < KEY_KIND_MAX; i++)

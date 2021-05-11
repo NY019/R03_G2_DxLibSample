@@ -1,5 +1,6 @@
 //ヘッダーファイルの読み込み
 #include "DxLib.h"	//DxLibを使うときは必要
+#include "Keyboard.h"
 
 //マクロ定義
 #define GAME_TITLE	"ゲームタイトル"	//ゲームタイトル
@@ -31,30 +32,46 @@ int WINAPI WinMain(
 
 
 	//ＤＸライブラリ初期化処理
-	if (DxLib_Init() == -1)
-	{
-		// エラーが起きたら直ちに終了
-		return -1;
-	}
-
-	
-
+	if (DxLib_Init() == -1){ return -1 ;}
 	SetDrawScreen(DX_SCREEN_BACK);
+
+	int x = GAME_WIDTH / 2;
+	int y = GAME_HEIGHT / 2;
+	int radius = 50;
 
 	//無限ループ
 	while (1)
 	{
-		
-
 		//メッセージを受け取り続ける
 		if (ProcessMessage() != 0) { break; }
-
 		if (ClearDrawScreen() != 0) { break; }
 
-		ScreenFlip();
-		//ＤＸライブラリ使用の終了処理
-		DxLib_End();
+		AllKeyUpdate();
 
-		return 0;	// ソフトの終了 
+		if (KeyDown(KEY_INPUT_W) == TRUE)
+		{
+			y--;
+		}
+		else if (KeyDown(KEY_INPUT_S) == TRUE)
+		{
+			y++;
+		}
+
+		if (KeyDown(KEY_INPUT_A) == TRUE)
+		{
+			x--;
+		}
+		else if (KeyDown(KEY_INPUT_D) == TRUE)
+		{
+			x++;
+		}
+
+		DrawCircle(x, y ,radius, GetColor(255, 255, 0), TRUE);
+
+		ScreenFlip(); 
 	}
+	//ＤＸライブラリ使用の終了処理
+	DxLib_End();
+
+	return 0;	// ソフトの終了
 }

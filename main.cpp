@@ -1,18 +1,46 @@
-//ヘッダーファイルの読み込み
-#include "DxLib.h"	//DxLibを使うときは必要
+
+#include "DxLib.h"	
 #include "Keyboard.h"
 
-//マクロ定義
-#define GAME_TITLE	"ゲームタイトル"	//ゲームタイトル
-#define GAME_WIDTH	1280				//ゲーム画面の幅(ウィドス)
-#define GAME_HEIGHT	720					//ゲーム画面の高さ(ハイト)
-#define GAME_COLOR  32					//ゲームの色域
 
-#define GAME_ICON_ID	333				//ゲームのICONのID
+#define GAME_TITLE	"ゲームタイトル"	
+#define GAME_WIDTH	1280				
+#define GAME_HEIGHT	720					
+#define GAME_COLOR  32					
+
+#define GAME_ICON_ID	333				
 #define GAME_WINDOW_BAR  0
-// プログラムは WinMain から始まります
-//Windowsのプログラミング方法 = (WinAPI)で動いている！
-//DxLibは、DirectXという、ゲームプログラミングをかんたんに使える仕組み
+
+enum GAME_SCENE {
+	GAME_SCENE_TITLE,
+	GAME_SCENE_PLAY,
+	GAME_SCENE_END,
+	GAME_SCENE_CHANGE
+};
+
+GAME_SCENE GameScene;
+GAME_SCENE OldGameScene;
+GAME_SCENE NextGameScene;
+	
+BOOL IsFadeOut = FALSE;
+BOOL IsFadeIn  = FALSE;
+
+VOID Title(VOID);
+VOID TitleProc(VOID);
+VOID TitleDraw(VOID);
+
+VOID Play(VOID);
+VOID PlayProc(VOID);
+VOID PlayDraw(VOID);
+
+VOID End(VOID);
+VOID EndProc(VOID);
+VOID EndDraw(VOID);
+
+VOID Change(VOID);
+VOID ChangeProc(VOID);
+VOID ChangeDraw(VOID);
+
 int WINAPI WinMain(
 	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -20,18 +48,18 @@ int WINAPI WinMain(
 	int nCmdShow)
 {
 	SetOutApplicationLogValidFlag(FALSE);
-	ChangeWindowMode(TRUE);								//ウィンドウモードに設定
-	SetMainWindowText(GAME_TITLE);						//ウィンドウのタイトルの文字
-	SetGraphMode(GAME_WIDTH, GAME_HEIGHT, GAME_COLOR);	//ウィンドウの解像度を設定
-	SetWindowSize(GAME_WIDTH, GAME_HEIGHT);				//ウィンドウの大きさを設定
-	SetBackgroundColor(255, 255, 255);					//デフォルトの背景の色
-	SetWindowIconID(GAME_ICON_ID);	           //アイコンファイルを読込
+	ChangeWindowMode(TRUE);								
+	SetMainWindowText(GAME_TITLE);						
+	SetGraphMode(GAME_WIDTH, GAME_HEIGHT, GAME_COLOR);	
+	SetWindowSize(GAME_WIDTH, GAME_HEIGHT);				
+	SetBackgroundColor(255, 255, 255);					
+	SetWindowIconID(GAME_ICON_ID);	           
 	SetWindowStyleMode(GAME_WINDOW_BAR);
 	SetWaitVSyncFlag(TRUE);
 	SetAlwaysRunFlag(TRUE);
 
 
-	//ＤＸライブラリ初期化処理
+	
 	if (DxLib_Init() == -1){ return -1 ;}
 	SetDrawScreen(DX_SCREEN_BACK);
 
@@ -39,14 +67,41 @@ int WINAPI WinMain(
 	int y = GAME_HEIGHT / 2;
 	int radius = 50;
 
-	//無限ループ
+	GameScene = GAME_SCENE_TITLE;
+
+	//∞ループ
 	while (1)
 	{
-		//メッセージを受け取り続ける
+		
 		if (ProcessMessage() != 0) { break; }
 		if (ClearDrawScreen() != 0) { break; }
 
 		AllKeyUpdate();
+
+		if (KeyClick(KEY_INPUT_ESCAPE) == TRUE) { break; }
+
+		if (GameScene != GAME_SCENE_CHANGE)
+		{
+			OldGameScene = GameScene;
+		}
+
+		switch (GameScene)
+		{
+		case GAME_SCENE_TITLE:
+			Title();
+			break;
+		case GAME_SCENE_PLAY:
+			Play();
+			break;
+		case GAME_SCENE_END:
+			End();
+			break;
+		case GAME_SCENE_CHANGE:
+			Change();
+			break;
+		default:
+			break;
+		}
 
 		if (KeyDown(KEY_INPUT_W) == TRUE)
 		{
@@ -70,8 +125,80 @@ int WINAPI WinMain(
 
 		ScreenFlip(); 
 	}
-	//ＤＸライブラリ使用の終了処理
+	
 	DxLib_End();
 
-	return 0;	// ソフトの終了
+	return 0;	
+}
+
+VOID Title(VOID)
+{
+	TitleProc();
+	TitleDraw();
+	return;
+}
+
+VOID TitleProc(VOID)
+{
+	return;
+}
+
+VOID TitleDraw(VOID)
+{
+	DrawString(0, 0, "タイトル画面", GetColor(0, 0, 0));
+	return;
+}
+
+VOID Play(VOID)
+{
+	PlayProc();
+	PlayDraw();
+	return;
+}
+
+
+VOID PlayProc(VOID)
+{
+	return;
+}
+
+VOID PlayDraw(VOID)
+{
+	DrawString(0, 0, "プレイ画面", GetColor(0, 0, 0));
+	return;
+}
+VOID End(VOID)
+{
+	EndProc();
+	EndDraw();
+	return;
+}
+
+VOID EndProc(VOID)
+{
+	return;
+}
+
+VOID EndDraw(VOID)
+{
+	DrawString(0, 0, "エンド画面", GetColor(0, 0, 0));
+	return;
+}
+
+VOID Change(VOID)
+{
+	ChangeProc();
+	ChangeDraw();
+	return;
+}
+
+VOID ChangeProc(VOID)
+{
+	return;
+}
+
+VOID ChangeDraw(VOID)
+{
+	DrawString(0, 0, "切り替え画面", GetColor(0, 0, 0));
+	return;
 }

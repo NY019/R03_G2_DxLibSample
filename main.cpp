@@ -25,6 +25,17 @@ GAME_SCENE NextGameScene;
 BOOL IsFadeOut = FALSE;
 BOOL IsFadeIn  = FALSE;
 
+int fadeTimeMill = 2000;
+int fadeTimeMax = fadeTimeMill / 1000 * 60;
+
+int fadeOutCntInit = 0;
+int fadeOutCnt = fadeOutCntInit;
+int fadeOutCntMax = fadeTimeMax;
+
+int fadeInCntInit = fadeTimeMax;
+int fadeInCnt = fadeInCntInit;
+int fadeInCntMax = fadeTimeMax;
+
 VOID Title(VOID);
 VOID TitleProc(VOID);
 VOID TitleDraw(VOID);
@@ -40,6 +51,8 @@ VOID EndDraw(VOID);
 VOID Change(VOID);
 VOID ChangeProc(VOID);
 VOID ChangeDraw(VOID);
+
+VOID ChangeScene(GAME_SCENE scene);
 
 int WINAPI WinMain(
 	HINSTANCE hInstance,
@@ -103,6 +116,15 @@ int WINAPI WinMain(
 			break;
 		}
 
+		if (OldGameScene != GameScene)
+		{
+			if (GameScene != GAME_SCENE_CHANGE)
+			{
+				NextGameScene = GameScene;
+				GameScene  = GAME_SCENE_CHANGE;
+			}
+		}
+
 		if (KeyDown(KEY_INPUT_W) == TRUE)
 		{
 			y--;
@@ -131,6 +153,13 @@ int WINAPI WinMain(
 	return 0;	
 }
 
+VOID ChangeScene(GAME_SCENE scene)
+{
+	GameScene = scene;
+	IsFadeIn = FALSE;
+	IsFadeOut = TRUE;
+}
+
 VOID Title(VOID)
 {
 	TitleProc();
@@ -140,6 +169,11 @@ VOID Title(VOID)
 
 VOID TitleProc(VOID)
 {
+	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
+	{
+		ChangeScene(GAME_SCENE_PLAY);
+	}
+
 	return;
 }
 
@@ -159,6 +193,10 @@ VOID Play(VOID)
 
 VOID PlayProc(VOID)
 {
+	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
+	{
+		ChangeScene(GAME_SCENE_END);
+	}
 	return;
 }
 
@@ -176,6 +214,10 @@ VOID End(VOID)
 
 VOID EndProc(VOID)
 {
+	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
+	{
+		ChangeScene(GAME_SCENE_TITLE);
+	}
 	return;
 }
 
@@ -194,11 +236,70 @@ VOID Change(VOID)
 
 VOID ChangeProc(VOID)
 {
+	if (IsFadeIn == TRUE)
+	{
+		if (fadeInCnt > fadeInCntMax)
+		{
+			fadeInCnt++;
+		}
+		else
+		{
+			fadeInCnt = fadeInCntInit;
+			IsFadeIn = FALSE;
+		}
+	}
+
+	if (IsFadeOut == TRUE)
+	{
+		if (fadeOutCnt > fadeOutCntMax)
+		{
+			fadeOutCnt++;
+		}
+		else
+		{
+			fadeOutCnt = fadeOutCntInit;
+			IsFadeOut = FALSE;
+		}
+	}
+
+	if (IsFadeIn == FALSE && IsFadeOut == FALSE) 
+	{
+		GameScene = NextGameScene;
+		OldGameScene = GameScene;
+	}
 	return;
 }
 
 VOID ChangeDraw(VOID)
 {
+	switch (OldGameScene)
+	{
+	case GAME_SCENE_TITLE:
+		TitleDraw();
+		break;
+	case GAME_SCENE_PLAY:
+		PlayDraw();
+		break; 
+	case GAME_SCENE_END:
+		EndDraw();
+			break;
+	default:
+		break;
+	}
+
+	if (IsFadeIn == TRUE)
+	{
+		SetDrawBlendMode(DX_BLENDGRAPHTYPE_ALPHA, ((float)fadeInCnt / fadeInCntMax) * 255);
+	}
+
+	if (IsFadeOut == TRUE)
+	{
+		SetDrawBlendMode(DX_BLENDGRAPHTYPE_ALPHA, ((float)fadeOutCnt / fadeOutCntMax) * 255);
+	}
+
+	DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 0), TRUE);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
 	DrawString(0, 0, "êÿÇËë÷Ç¶âÊñ ", GetColor(0, 0, 0));
 	return;
 }
